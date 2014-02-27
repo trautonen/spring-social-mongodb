@@ -137,6 +137,7 @@ public class MongoConnectionRepository implements ConnectionRepository {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <A> Connection<A> findPrimaryConnection(final Class<A> apiType) {
         final String providerId = getProviderId(apiType);
         return (Connection<A>) findPrimaryConnection(providerId);
