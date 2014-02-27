@@ -66,6 +66,7 @@ public class MongoConnectionRepository implements ConnectionRepository {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <A> List<Connection<A>> findConnections(final Class<A> apiType) {
         final List<?> connections = findConnections(getProviderId(apiType));
         return (List<Connection<A>>) connections;
@@ -120,12 +121,14 @@ public class MongoConnectionRepository implements ConnectionRepository {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <A> Connection<A> getConnection(final Class<A> apiType, final String providerUserId) {
         final String providerId = getProviderId(apiType);
         return (Connection<A>) getConnection(new ConnectionKey(providerId, providerUserId));
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <A> Connection<A> getPrimaryConnection(final Class<A> apiType) {
         final String providerId = getProviderId(apiType);
         final Connection<A> connection = (Connection<A>) findPrimaryConnection(providerId);
