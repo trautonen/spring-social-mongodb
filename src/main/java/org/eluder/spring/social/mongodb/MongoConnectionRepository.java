@@ -43,7 +43,7 @@ public class MongoConnectionRepository implements ConnectionRepository {
 
     @Override
     public MultiValueMap<String, Connection<?>> findAllConnections() {
-        final Query query = query(where("userId").is(userId)).with(new Sort("providerId", "created"));
+        final Query query = query(where("userId").is(userId)).with(sortByProviderId().and(sortByCreated()));
         final List<Connection<?>> results = findConnections(query);
         final MultiValueMap<String, Connection<?>> connections = new LinkedMultiValueMap<>();
         for (String registeredProviderId : connectionFactoryLocator.registeredProviderIds()) {
@@ -61,7 +61,7 @@ public class MongoConnectionRepository implements ConnectionRepository {
 
     @Override
     public List<Connection<?>> findConnections(final String providerId) {
-        final Query query = query(where("userId").is(userId).and("providerId").is(providerId)).with(new Sort("created"));
+        final Query query = query(where("userId").is(userId).and("providerId").is(providerId)).with(sortByCreated());
         return ImmutableList.copyOf(findConnections(query));
     }
 
@@ -87,7 +87,7 @@ public class MongoConnectionRepository implements ConnectionRepository {
         final Criteria criteria = where("userId").is(userId);
         criteria.orOperator(filters.toArray(new Criteria[filters.size()]));
 
-        final Query query = new Query(criteria).with(new Sort("providerId", "created"));
+        final Query query = new Query(criteria).with(sortByProviderId().and(sortByCreated()));
         final List<Connection<?>> results = transform(mongo.find(query, MongoConnection.class), mongoConnectionTransformers.toConnection());
 
         MultiValueMap<String, Connection<?>> connectionsForUsers = new LinkedMultiValueMap<>();
@@ -184,7 +184,7 @@ public class MongoConnectionRepository implements ConnectionRepository {
     }
 
     private Connection<?> findPrimaryConnection(String providerId) {
-        final Query query = query(where("userId").is(userId).and("providerId").is(providerId)).with(new Sort("created"));
+        final Query query = query(where("userId").is(userId).and("providerId").is(providerId)).with(sortByCreated());
         return findOneConnection(query);
     }
 
@@ -198,5 +198,13 @@ public class MongoConnectionRepository implements ConnectionRepository {
 
     private <A> String getProviderId(Class<A> apiType) {
         return connectionFactoryLocator.getConnectionFactory(apiType).getProviderId();
+    }
+    
+    private Sort sortByProviderId() {
+        return new Sort(Sort.Direction.ASC, "providerId");
+    }
+    
+    private Sort sortByCreated() {
+        return new Sort(Sort.Direction.DESC, "created");
     }
 }
